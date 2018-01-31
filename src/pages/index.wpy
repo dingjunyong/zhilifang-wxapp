@@ -1,0 +1,48 @@
+<script>
+  import wepy from 'wepy';
+  export default class exchangeGoods extends wepy.page {
+    config = {
+      navigationBarTitleText: '免费洗车',
+    }
+    data = {
+      list: [],
+      aways: 0
+    }
+    onLoad() {
+      let arry = {
+        days: [{
+            is_sign: true
+          },
+          {
+            is_sign: false
+          },
+          {
+            is_sign: false
+          },
+          {
+            is_sign: false
+          },
+          {
+            is_sign: false
+          },
+          {
+            is_sign: false
+          },
+          {
+            is_sign: false
+          }
+        ],
+        aways: 3
+      }
+      // this.list = arry;
+      console.log(arry)
+      this.list = arry.days;
+      this.aways = arry.aways;
+    }
+    computed = {}
+    methods = {}
+    events = {}
+  }
+</script>
+<style lang="less">
+</style>
