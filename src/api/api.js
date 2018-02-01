@@ -3,8 +3,7 @@ import {
 } from '../utils/wxRequest';
 
 let env = "-test" //-dev 或者 -test
-const apiMall = 'https://sujiefs.com/'
-//const apiMall = 'https://api.tangxinmao.com'
+const apiMall = 'http://127.0.0.1:5000'
 
 /**
  * 获取发现好商品接口
@@ -82,12 +81,12 @@ const favoriteInfo = (params) => wxRequest(params, apiMall + '/api/goodsFavorite
 const messageInfo = (params) => wxRequest(params, apiMall + '/api/systemMessage/messageInfo');
 
 //用户手机绑定
-const registerUser = (params) => wxRequest(params, apiMall + '/api/userCenter/register');
+const registerUser = (params) => wxRequest(params, apiMall + '/api/usercenter/register');
 //发送短信
 const sendRandCode = (params) => wxRequest(params, apiMall + '/api/sms/send');
 
 //用户是否绑定手机号
-const getUserInfo = (params) => wxRequest(params, apiMall + '/api/userCenter/getUserInfo');
+const getUserInfo = (params) => wxRequest(params, apiMall + '/api/usercenter/getUserInfo');
 
 //用户收货地址
 const getUserAddress = (params) => wxRequest(params, apiMall + '/api/receiverInfo/list');

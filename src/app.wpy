@@ -7,13 +7,16 @@
 <script>
 import wepy from 'wepy';
 import 'wepy-async-function'
-// import {
-//   USER_SPECICAL_INFO,
-//   USER_INFO,
-//   SYSTEM_INFO,
-//   ADDRESS_ID,
-//   SEL_CLASS_CODE
-// } from './utils/constant';
+import {
+  USER_SPECICAL_INFO,
+  USER_INFO,
+  SYSTEM_INFO,
+  ADDRESS_ID,
+  SEL_CLASS_CODE
+} from "./utils/constant";
+import {
+  wxJsCode2Session
+} from './api/api';
 
 export default class extends wepy.app {
   config = {
@@ -44,12 +47,12 @@ export default class extends wepy.app {
       'borderStyle': 'black',
       'list': [{
         'pagePath': 'pages/index',
-        'text': '免费洗车',
+        'text': '活动',
         'iconPath': 'images/icon_home.png',
         'selectedIconPath': 'images/icon_home_active.png'
       }, {
         'pagePath': 'pages/shop_cart',
-        'text': '洗车卡',
+        'text': '车卡',
         'iconPath': 'images/icon_shop_cart.png',
         'selectedIconPath': 'images/icon_shop_cart_active.png'
       }, {
@@ -62,42 +65,65 @@ export default class extends wepy.app {
   }
 
   globalData = {
-    userInfo: null
+    userInfo: null,
+    appid: 'wxfb39705a144d0144',
+    secret: 'e8cd29ee68a6131d3bb7fdd98b5022f4',
   }
 
   constructor () {
     super()
     this.use('requestfix')
+    this.use('promisify');
   }
 
-  onLaunch() {
-    this.testAsync()
-  }
+  async onLaunch() {
+    // debugger;
+    // wepy.clearStorageSync();
+    let that = this;
+    //用户信息
+    let userSpecialInfo = wepy.getStorageSync(USER_SPECICAL_INFO) || {};
+    // 用户普通信息
+    let userInfo = wepy.getStorageSync(USER_INFO) || {};
+    //如果信息过期
+    if ((!userSpecialInfo.openid || (userSpecialInfo.expires_in || Date.now()) < (Date.now() + 600)) && (!userInfo.nickName)) {
+      let res = await wepy.login();
+      if (res.code) {
+        let d = that.globalData; //这里存储了appid、secret、token串    
+        //存储userInfo 
+        let c = await wepy.getUserInfo();
+        wepy.setStorageSync(USER_INFO, c.userInfo);
+        //存储系统信息 
+        let systemInfo = wepy.getSystemInfoSync();
+        wepy.setStorageSync(SYSTEM_INFO, systemInfo);
 
-  sleep (s) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('promise resolved')
-      }, s * 1000)
-    })
-  }
-
-  async testAsync () {
-    const data = await this.sleep(3)
-    console.log(data)
-  }
-
-  getUserInfo(cb) {
-    const that = this
-    if (this.globalData.userInfo) {
-      return this.globalData.userInfo
-    }
-    wepy.getUserInfo({
-      success (res) {
-        that.globalData.userInfo = res.userInfo
-        cb && cb(res.userInfo)
+        wxJsCode2Session({
+          query: {
+            jsCode: res.code,
+            nickName: c.userInfo.nickName
+          }
+        }).then(resp => {
+          var rlt = resp.data;
+          if (rlt.result) {
+            var data = rlt.data;
+            if (data.openid) {
+              let obj = {};
+              obj.openid = data.openid;
+              obj.expires_in = Date.now() + data.expires_in;
+              //存储openid 
+              wepy.setStorageSync(USER_SPECICAL_INFO, obj);
+            }
+          } else {
+            let obj = {};
+            obj.openid = "oshfb4paszke7RIu5Ys55LJp68YM";
+            obj.expires_in = "7200";
+            //存储openid 
+            wepy.setStorageSync(USER_SPECICAL_INFO, obj);
+          }
+        });
+      } else {
+        console.log('获取用户登录态失败！' + res.errMsg)
       }
-    })
+    }
   }
 }
 </script>
